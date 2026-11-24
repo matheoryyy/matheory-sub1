@@ -1,0 +1,2070 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MATHEORY 減法魔法泡泡射手 🏹</title>
+    <style>
+        /* =========================================
+           1. 全域設計變數與溫馨粉彩奶油配色
+           ========================================= */
+        :root {
+            --bg-cream: #FFFDF7;
+            --sky-top: #E8F5FF;
+            --sky-mid: #F6FBFF;
+            --sky-bottom: #FFFDF7;
+            --butter: #FFEAA7;
+            --butter-dark: #E5B83B;
+            --mint: #A8E6CF;
+            --mint-dark: #38B288;
+            --sky-blue: #BAE1FF;
+            --sky-blue-dark: #4A90E2;
+            --coral: #FFAAA5;
+            --coral-dark: #E85D75;
+            --text-main: #4A3F35;
+            --text-sub: #7D6E60;
+            --card-bg: rgba(255, 255, 255, 0.96);
+            --border-soft: #EFE3CE;
+            --shadow-soft: 0 12px 30px rgba(74, 63, 53, 0.09);
+            --radius-xl: 28px;
+            --radius-lg: 20px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: "Hiragino Maru Gothic ProN", "PingFang TC", "Microsoft JhengHei", "Nunito", sans-serif;
+            background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 55%, var(--sky-bottom) 100%);
+            color: var(--text-main);
+        }
+
+        /* =========================================
+           2. 應用主容器與共用頂部列
+           ========================================= */
+        .app-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 1060px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-bar {
+            position: relative;
+            z-index: 30;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 16px;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .brand-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: 2.5px solid var(--butter-dark);
+            font-weight: 900;
+            font-size: 0.92rem;
+            color: var(--text-main);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--border-soft);
+            background: #FFFFFF;
+            font-size: 1.15rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+            transition: transform 0.12s, background-color 0.2s, border-color 0.2s;
+        }
+
+        .icon-btn:active {
+            transform: scale(0.9);
+        }
+
+        .icon-btn.active {
+            background: var(--butter);
+            border-color: var(--butter-dark);
+        }
+
+        /* =========================================
+           3. 多畫面切換系統
+           ========================================= */
+        .screen {
+            display: none;
+            flex: 1;
+            width: 100%;
+            height: calc(100% - 60px);
+            position: relative;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* =========================================
+           4. 主選單畫面 (三關卡完整同屏呈現)
+           ========================================= */
+        #screen-home {
+            overflow-y: auto;
+            padding: 4px 16px 20px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .home-card {
+            width: 100%;
+            max-width: 960px;
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            border: 4px solid #FFFFFF;
+            box-shadow: var(--shadow-soft);
+            padding: 20px 22px 24px;
+            margin: auto;
+        }
+
+        .hero-section {
+            text-align: center;
+            margin-bottom: 14px;
+        }
+
+        /* =========================================
+           頂部插畫小動畫橫幅 (參考圖風格適配泡泡射手)
+           ========================================= */
+        .hero-banner-scene {
+            position: relative;
+            width: 100%;
+            height: 158px;
+            border-radius: 22px;
+            background: linear-gradient(180deg, #B8E1FF 0%, #DFF2FF 72%, #EBF8FF 100%);
+            border: 3px solid #FFFFFF;
+            box-shadow: 0 8px 20px rgba(74, 144, 226, 0.14), inset 0 2px 8px rgba(255, 255, 255, 0.8);
+            overflow: hidden;
+            margin-bottom: 14px;
+        }
+
+        /* 柔和綠地山丘 */
+        .scene-hill-back {
+            position: absolute;
+            bottom: -24px;
+            left: -10%;
+            width: 65%;
+            height: 76px;
+            background: #9BE58B;
+            border-radius: 50% 50% 0 0;
+        }
+
+        .scene-hill-front {
+            position: absolute;
+            bottom: -28px;
+            right: -12%;
+            width: 72%;
+            height: 82px;
+            background: #7ED96D;
+            border-radius: 50% 50% 0 0;
+        }
+
+        /* 漂浮白雲與旋轉太陽 */
+        .scene-sun {
+            position: absolute;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #FFE066 35%, #F59E0B 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 14px rgba(251, 191, 36, 0.8);
+            animation: sunPulse 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes sunPulse {
+            0% { transform: translateX(-50%) scale(0.95); box-shadow: 0 0 10px rgba(251, 191, 36, 0.7); }
+            100% { transform: translateX(-50%) scale(1.08); box-shadow: 0 0 20px rgba(251, 191, 36, 1); }
+        }
+
+        .scene-cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 999px;
+            height: 14px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+        }
+
+        .scene-cloud::before,
+        .scene-cloud::after {
+            content: '';
+            position: absolute;
+            background: inherit;
+            border-radius: 50%;
+        }
+
+        .scene-cloud.c1 {
+            width: 36px;
+            top: 18px;
+            left: 8%;
+            animation: cloudDrift 7s ease-in-out infinite alternate;
+        }
+        .scene-cloud.c1::before { width: 16px; height: 16px; top: -7px; left: 6px; }
+        .scene-cloud.c1::after { width: 13px; height: 13px; top: -5px; right: 6px; }
+
+        .scene-cloud.c2 {
+            width: 38px;
+            top: 20px;
+            right: 8%;
+            animation: cloudDrift 8s ease-in-out infinite alternate-reverse;
+        }
+        .scene-cloud.c2::before { width: 17px; height: 17px; top: -8px; left: 7px; }
+        .scene-cloud.c2::after { width: 13px; height: 13px; top: -5px; right: 6px; }
+
+        @keyframes cloudDrift {
+            0% { transform: translateX(-6px); }
+            100% { transform: translateX(8px); }
+        }
+
+        /* 左右兩排算式泡泡牌 */
+        .scene-pills-col {
+            position: absolute;
+            top: 12px;
+            bottom: 12px;
+            width: 32%;
+            max-width: 195px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 4;
+        }
+
+        .scene-pills-col.left {
+            left: 14px;
+        }
+
+        .scene-pills-col.right {
+            right: 14px;
+        }
+
+        .eq-pill-badge {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: clamp(0.76rem, 2.2vw, 0.94rem);
+            font-weight: 900;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            white-space: nowrap;
+            animation: pillBob 3.2s ease-in-out infinite;
+        }
+
+        .pill-blue { border: 3px solid #60A5FA; color: #1D4ED8; animation-delay: 0s; }
+        .pill-yellow { border: 3px solid #FBBF24; color: #B45309; animation-delay: 0.4s; }
+        .pill-green { border: 3px solid #4ADE80; color: #15803D; animation-delay: 0.8s; }
+        .pill-coral { border: 3px solid #F87171; color: #B91C1C; animation-delay: 0.2s; }
+        .pill-purple { border: 3px solid #818CF8; color: #4338CA; animation-delay: 0.6s; }
+        .pill-amber { border: 3px solid #F59E0B; color: #B45309; animation-delay: 1s; }
+
+        @keyframes pillBob {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-3.5px); }
+        }
+
+        /* 中央魔法貓咪角色與魔杖光束 */
+        .scene-cat-center {
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 130px;
+            height: 98px;
+            z-index: 5;
+            animation: catHeroBob 2.6s ease-in-out infinite;
+        }
+
+        @keyframes catHeroBob {
+            0%, 100% { transform: translateX(-50%) translateY(0px); }
+            50% { transform: translateX(-50%) translateY(-4px); }
+        }
+
+        .wand-spark-beam {
+            stroke-dasharray: 90;
+            stroke-dashoffset: 90;
+            animation: shootSparkBeam 3.2s ease-out infinite;
+        }
+
+        .wand-star-pop {
+            transform-origin: 96px 26px;
+            animation: starPopFlash 3.2s ease-in-out infinite;
+        }
+
+        @keyframes shootSparkBeam {
+            0%, 18% { stroke-dashoffset: 90; opacity: 0; }
+            28% { stroke-dashoffset: 0; opacity: 1; }
+            52% { stroke-dashoffset: 0; opacity: 0.9; }
+            68%, 100% { stroke-dashoffset: 0; opacity: 0; }
+        }
+
+        @keyframes starPopFlash {
+            0%, 24% { transform: scale(0.5) rotate(0deg); opacity: 0.4; }
+            34% { transform: scale(1.35) rotate(25deg); opacity: 1; }
+            55% { transform: scale(1) rotate(45deg); opacity: 0.85; }
+            75%, 100% { transform: scale(0.6) rotate(0deg); opacity: 0; }
+        }
+
+        /* 品牌暖橘色圓角徽章：✨ MATHEORY 數理運算訓練 ✨ */
+        .brand-training-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: #FFF3E0;
+            border: 2px solid #FDE0B6;
+            color: #EA580C;
+            font-size: 0.86rem;
+            font-weight: 900;
+            padding: 5px 18px;
+            border-radius: 999px;
+            margin-bottom: 8px;
+            box-shadow: 0 3px 8px rgba(234, 88, 12, 0.08);
+            letter-spacing: 0.5px;
+        }
+
+        .hero-title {
+            font-size: clamp(1.45rem, 4.2vw, 2.15rem);
+            font-weight: 900;
+            color: var(--text-main);
+            letter-spacing: 0.5px;
+            line-height: 1.25;
+        }
+
+        .hero-desc {
+            font-size: 0.94rem;
+            color: var(--text-sub);
+            font-weight: 700;
+            margin-top: 6px;
+        }
+
+        @media (max-width: 520px) {
+            .hero-banner-scene {
+                height: 142px;
+            }
+            .scene-pills-col {
+                width: 33%;
+            }
+            .scene-pills-col.left {
+                left: 8px;
+            }
+            .scene-pills-col.right {
+                right: 8px;
+            }
+            .eq-pill-badge {
+                padding: 3px 6px;
+                font-size: 0.72rem;
+                border-width: 2.5px;
+            }
+            .scene-cat-center {
+                width: 108px;
+                height: 82px;
+            }
+        }
+
+        /* =========================================
+           5. 街機遊戲主畫面 (HUD + Canvas + 魔法炮台)
+           ========================================= */
+        #screen-game {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .arcade-hud {
+            position: relative;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            padding: 4px 16px 8px;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .hud-group {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            pointer-events: auto;
+        }
+
+        .hud-box {
+            background: rgba(255, 255, 255, 0.94);
+            border: 2px solid var(--border-soft);
+            border-radius: 14px;
+            padding: 5px 11px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 900;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .hud-level-badge {
+            background: #FEF3C7;
+            border-color: #FCD34D;
+            color: #92400E;
+        }
+
+        .hud-quit-btn {
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid var(--border-soft);
+            border-radius: 14px;
+            padding: 5px 11px;
+            font-family: inherit;
+            font-weight: 800;
+            font-size: 0.86rem;
+            color: var(--text-main);
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .hud-quit-btn:active {
+            transform: scale(0.95);
+        }
+
+        .timer-box.urgent {
+            background: #FFE4E6;
+            border-color: #FB7185;
+            color: #E11D48;
+            animation: pulseFast 0.6s infinite alternate;
+        }
+
+        @keyframes pulseFast {
+            from { transform: scale(1); }
+            to { transform: scale(1.07); }
+        }
+
+        /* 狂熱模式 (FEVER) 與連擊徽章 */
+        .combo-banner {
+            position: absolute;
+            top: 50px;
+            right: 16px;
+            z-index: 20;
+            background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%);
+            border: 3px solid #FFFFFF;
+            border-radius: 999px;
+            padding: 5px 14px;
+            font-weight: 900;
+            font-size: 0.9rem;
+            color: #881337;
+            box-shadow: 0 6px 15px rgba(244, 63, 94, 0.25);
+            transform: scale(0);
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: none;
+        }
+
+        .combo-banner.visible {
+            transform: scale(1);
+        }
+
+        .combo-banner.fever {
+            background: linear-gradient(90deg, #FFD166, #FF8C69, #FF6B6B);
+            color: #FFFFFF;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+            animation: rainbowGlow 0.75s infinite alternate;
+        }
+
+        @keyframes rainbowGlow {
+            from { transform: scale(1.03); box-shadow: 0 0 12px #FFD166; }
+            to { transform: scale(1.1); box-shadow: 0 0 22px #FF8C69; }
+        }
+
+        /* 互動遊戲畫布 */
+        #game-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            touch-action: none;
+            cursor: pointer;
+        }
+
+        /* 角落視覺十格陣 & 數鍵小幫手卡片 */
+        .helper-card {
+            position: absolute;
+            top: 50px;
+            left: 16px;
+            z-index: 20;
+            background: rgba(255, 254, 245, 0.95);
+            border: 2.5px solid #FBBF24;
+            border-radius: 16px;
+            padding: 8px 11px;
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            max-width: 245px;
+            box-shadow: 0 6px 16px rgba(217, 119, 6, 0.14);
+            pointer-events: none;
+        }
+
+        .helper-card.visible {
+            display: flex;
+        }
+
+        .helper-title {
+            font-size: 0.78rem;
+            font-weight: 900;
+            color: #B45309;
+        }
+
+        .ten-frame-rows {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .tf-row {
+            display: flex;
+            gap: 4px;
+        }
+
+        .tf-dot {
+            width: 15px;
+            height: 15px;
+            border-radius: 4px;
+            background: #FBBF24;
+            border: 1.5px solid #D97706;
+        }
+
+        .tf-dot.ten-group {
+            background: #60A5FA;
+            border-color: #2563EB;
+        }
+
+        .tf-dot.crossed {
+            background: #F3F4F6;
+            border: 1.5px dashed #9CA3AF;
+            position: relative;
+        }
+
+        .tf-dot.crossed::after {
+            content: "×";
+            position: absolute;
+            top: -4px;
+            left: 2px;
+            font-size: 12px;
+            font-weight: 900;
+            color: #EF4444;
+        }
+
+        .helper-trick-text {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: #78350F;
+            line-height: 1.35;
+        }
+
+        /* 鼓勵提示浮動氣泡 */
+        .hint-toast {
+            position: absolute;
+            bottom: 142px;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            z-index: 20;
+            background: rgba(255, 253, 240, 0.97);
+            border: 3px solid #FBBF24;
+            border-radius: 20px;
+            padding: 7px 16px;
+            max-width: 90%;
+            width: max-content;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(217, 119, 6, 0.18);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s, transform 0.25s;
+        }
+
+        .hint-toast.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .hint-toast-text {
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: #92400E;
+        }
+
+        /* 底部魔法貓咪與發光水晶球算式台 */
+        .cannon-dock {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: none;
+            width: 92%;
+            max-width: 410px;
+        }
+
+        .wizard-cat-svg {
+            width: 78px;
+            height: 62px;
+            margin-bottom: -10px;
+            z-index: 2;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.12));
+            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .wizard-cat-svg.shoot {
+            transform: scale(1.18) translateY(-5px);
+        }
+
+        .crystal-ball-panel {
+            width: 100%;
+            background: linear-gradient(180deg, #FFFFFF 0%, #FFF9EB 100%);
+            border: 4px solid #FBBF24;
+            border-radius: 28px;
+            padding: 10px 20px 12px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.25), inset 0 -4px 0 #FDE68A;
+        }
+
+        .crystal-tag {
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: #D97706;
+            margin-bottom: 2px;
+        }
+
+        .crystal-equation {
+            font-size: clamp(2rem, 7vw, 2.65rem);
+            font-weight: 900;
+            color: var(--text-main);
+            letter-spacing: 2px;
+            line-height: 1.15;
+        }
+
+        .crystal-equation span.q-mark {
+            display: inline-block;
+            background: #FEF3C7;
+            color: #D97706;
+            border: 2px dashed #F59E0B;
+            border-radius: 12px;
+            padding: 0 12px;
+            margin-left: 4px;
+        }
+
+        /* =========================================
+           6. 結算畫面
+           ========================================= */
+        #screen-result {
+            overflow-y: auto;
+            padding: 8px 18px 24px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result-card {
+            width: 100%;
+            max-width: 620px;
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            border: 4px solid #FFFFFF;
+            box-shadow: var(--shadow-soft);
+            padding: 22px 20px 26px;
+            text-align: center;
+            margin: auto;
+        }
+
+        .stars-display {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            font-size: 3rem;
+            margin-bottom: 8px;
+        }
+
+        .star {
+            filter: grayscale(100%) opacity(0.28);
+            transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .star.earned {
+            filter: none;
+            transform: scale(1.12);
+        }
+
+        .result-heading {
+            font-size: 1.65rem;
+            font-weight: 900;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .result-sub {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-sub);
+            margin-bottom: 16px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            background: #FFF9EC;
+            border: 2px solid var(--border-soft);
+            border-radius: var(--radius-lg);
+            padding: 12px 8px;
+            margin-bottom: 16px;
+        }
+
+        .metric-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .metric-num {
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: var(--text-main);
+        }
+
+        .metric-lbl {
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: var(--text-sub);
+        }
+
+        .missed-box {
+            text-align: left;
+            background: #FFF5F5;
+            border: 2px solid #FED7D7;
+            border-radius: var(--radius-lg);
+            padding: 12px 14px;
+            margin-bottom: 18px;
+            max-height: 185px;
+            overflow-y: auto;
+        }
+
+        .missed-box.perfect {
+            background: #F0FDF4;
+            border-color: #BBF7D0;
+            text-align: center;
+        }
+
+        .missed-title {
+            font-size: 0.92rem;
+            font-weight: 900;
+            color: #C53030;
+            margin-bottom: 8px;
+        }
+
+        .missed-item {
+            background: #FFFFFF;
+            border-radius: 12px;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            border: 1px solid #FEE2E2;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .missed-eq {
+            font-size: 1rem;
+            font-weight: 900;
+            color: var(--text-main);
+        }
+
+        .missed-eq span.ans {
+            color: #16A34A;
+        }
+
+        .missed-tip {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--text-sub);
+        }
+
+        .result-btns {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 14px 18px;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-family: inherit;
+            font-size: 1.05rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: transform 0.12s;
+        }
+
+        .action-btn:active {
+            transform: translateY(3px);
+        }
+
+        .btn-again {
+            background: var(--butter);
+            color: var(--text-main);
+            box-shadow: 0 5px 0 var(--butter-dark);
+        }
+
+        .btn-stages {
+            background: var(--sky-blue);
+            color: #1E3A8A;
+            box-shadow: 0 5px 0 var(--sky-blue-dark);
+        }
+
+        @media (max-width: 520px) {
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .hud-box {
+                padding: 4px 8px;
+                font-size: 0.82rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+    <!-- 頂部品牌列與音效/提示開關 -->
+    <header class="top-bar">
+        <div class="brand-pill">
+            <span>MATHEORY 減法魔法泡泡射手 🏹</span>
+        </div>
+        <div class="top-actions">
+            <button id="btn-hint-toggle" class="icon-btn" title="心算小幫手" aria-label="心算小幫手">💡</button>
+            <button id="btn-sound-toggle" class="icon-btn active" title="音效開關" aria-label="音效開關">🔊</button>
+        </div>
+    </header>
+
+    <!-- =========================================
+         畫面 1：主選單與三大關卡選擇
+         ========================================= -->
+    <main id="screen-home" class="screen active">
+        <div class="home-card">
+            <div class="hero-section">
+                <!-- 頂部插畫小動畫橫幅 -->
+                <div class="hero-banner-scene" aria-hidden="true">
+                    <div class="scene-cloud c1"></div>
+                    <div class="scene-sun"></div>
+                    <div class="scene-cloud c2"></div>
+                    <div class="scene-hill-back"></div>
+                    <div class="scene-hill-front"></div>
+
+                    <!-- 左側三張減法算式泡泡牌 -->
+                    <div class="scene-pills-col left">
+                        <div class="eq-pill-badge pill-blue">10 − 3 = 7</div>
+                        <div class="eq-pill-badge pill-yellow">16 − 10 = 6</div>
+                        <div class="eq-pill-badge pill-green">18 − 8 = 10</div>
+                    </div>
+
+                    <!-- 中央魔法貓咪與星星魔杖動畫 -->
+                    <svg class="scene-cat-center" viewBox="0 0 150 110">
+                        <!-- 魔杖發射出的星星光束 -->
+                        <line class="wand-spark-beam" x1="112" y1="46" x2="142" y2="18" stroke="#FBBF24" stroke-width="4.5" stroke-linecap="round"/>
+                        <polygon class="wand-star-pop" points="96,16 99,23 106,23 100,28 102,35 96,30 90,35 92,28 86,23 93,23" fill="#FBBF24" stroke="#F59E0B" stroke-width="1.5"/>
+
+                        <!-- 魔法帽 -->
+                        <polygon points="75,10 47,44 103,44" fill="#7C3AED" stroke="#4C1D95" stroke-width="3" stroke-linejoin="round"/>
+                        <ellipse cx="75" cy="44" rx="36" ry="7.5" fill="#8B5CF6" stroke="#4C1D95" stroke-width="3"/>
+                        <polygon points="75,21 77,27 83,27 78,31 80,37 75,33 70,37 72,31 67,27 73,27" fill="#FBBF24"/>
+
+                        <!-- 貓耳朵 -->
+                        <polygon points="49,44 42,27 60,40" fill="#FDE68A" stroke="#78350F" stroke-width="3" stroke-linejoin="round"/>
+                        <polygon points="101,44 108,27 90,40" fill="#FDE68A" stroke="#78350F" stroke-width="3" stroke-linejoin="round"/>
+
+                        <!-- 貓咪圓臉 -->
+                        <ellipse cx="75" cy="68" rx="31" ry="25" fill="#FEF3C7" stroke="#78350F" stroke-width="3"/>
+
+                        <!-- 眼睛、腮紅與微笑 -->
+                        <circle cx="63" cy="65" r="3.8" fill="#4A3F35"/>
+                        <circle cx="87" cy="65" r="3.8" fill="#4A3F35"/>
+                        <ellipse cx="55" cy="73" rx="5" ry="2.8" fill="#FCA5A5"/>
+                        <ellipse cx="95" cy="73" rx="5" ry="2.8" fill="#FCA5A5"/>
+                        <path d="M70,72 Q75,77 80,72" fill="none" stroke="#4A3F35" stroke-width="2.5" stroke-linecap="round"/>
+
+                        <!-- 魔法棒 -->
+                        <line x1="103" y1="84" x2="122" y2="52" stroke="#B45309" stroke-width="4.5" stroke-linecap="round"/>
+                        <polygon points="122,42 125,49 132,49 126,54 128,61 122,56 116,61 118,54 112,49 119,49" fill="#FBBF24" stroke="#D97706" stroke-width="1.5"/>
+                    </svg>
+
+                    <!-- 右側三張減法算式泡泡牌 -->
+                    <div class="scene-pills-col right">
+                        <div class="eq-pill-badge pill-coral">10 − 6 = 4</div>
+                        <div class="eq-pill-badge pill-purple">16 − 6 = 10</div>
+                        <div class="eq-pill-badge pill-amber">8 − 7 = 1</div>
+                    </div>
+                </div>
+
+                <!-- 品牌暖橘色圓角徽章 -->
+                <div class="brand-training-pill">✨ MATHEORY 數理運算訓練 ✨</div>
+
+                <h1 class="hero-title">MATHEORY 減法魔法泡泡射手 🏹</h1>
+                <p class="hero-desc">點擊天空中正確答案的魔法泡泡，發射星星光束擊破它！</p>
+            </div>
+
+            <!-- 遊戲模式切換 -->
+            <div class="mode-bar">
+                <div class="mode-pill-group" id="play-mode-group">
+                    <button type="button" class="mode-btn active" data-mode="arcade">⏱️ 60秒街機挑戰</button>
+                    <button type="button" class="mode-btn" data-mode="relax">🌈 無時間休閒模式</button>
+                </div>
+            </div>
+
+            <!-- 三大關卡卡片 (全部完整呈現) -->
+            <div class="stages-grid">
+                <!-- 第一關：10的減法 -->
+                <button type="button" class="stage-card stage-1" onclick="startStage(1)">
+                    <div class="stage-top-row">
+                        <div class="stage-icon">🏝️</div>
+                        <span class="stage-level-tag">第一關</span>
+                    </div>
+                    <div class="stage-info">
+                        <h3>10的減法</h3>
+                        <p>10減數、減10 · 湊十好朋友</p>
+                        <div class="stage-badges">
+                            <span class="mini-badge">10−3</span>
+                            <span class="mini-badge">16−10</span>
+                        </div>
+                    </div>
+                    <div class="stage-cta">開始射擊 ▶</div>
+                </button>
+
+                <!-- 第二關：鄰居及雙胞胎數減法 -->
+                <button type="button" class="stage-card stage-2" onclick="startStage(2)">
+                    <div class="stage-top-row">
+                        <div class="stage-icon">🌲</div>
+                        <span class="stage-level-tag">第二關</span>
+                    </div>
+                    <div class="stage-info">
+                        <h3>鄰居及雙胞胎數減法</h3>
+                        <p>個位相同、相鄰兩數 · 眼力大考驗</p>
+                        <div class="stage-badges">
+                            <span class="mini-badge">18−8</span>
+                            <span class="mini-badge">16−15</span>
+                        </div>
+                    </div>
+                    <div class="stage-cta">開始射擊 ▶</div>
+                </button>
+
+                <!-- 第三關：四種混合減法 -->
+                <button type="button" class="stage-card stage-3" onclick="startStage(3)">
+                    <div class="stage-top-row">
+                        <div class="stage-icon">🏰</div>
+                        <span class="stage-level-tag">第三關</span>
+                    </div>
+                    <div class="stage-info">
+                        <h3>四種混合減法</h3>
+                        <p>四大減法全混合 · 終極泡泡射手</p>
+                        <div class="stage-badges">
+                            <span class="mini-badge">四類題型全挑戰</span>
+                        </div>
+                    </div>
+                    <div class="stage-cta">開始射擊 ▶</div>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- =========================================
+         畫面 2：街機射擊主畫面
+         ========================================= -->
+    <section id="screen-game" class="screen">
+        <!-- 頂部 HUD -->
+        <div class="arcade-hud">
+            <div class="hud-group">
+                <button type="button" class="hud-quit-btn" onclick="quitToMenu()">🏠 返回</button>
+                <div class="hud-box hud-level-badge" id="hud-level-badge">第一關：10的減法</div>
+            </div>
+
+            <div class="hud-group">
+                <div class="hud-box timer-box" id="hud-timer-box">
+                    <span>⏱️</span>
+                    <span id="hud-timer">60s</span>
+                </div>
+                <div class="hud-box">
+                    <span>⭐</span>
+                    <span id="hud-score">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 角落心算小幫手 (十格陣 + 口訣) -->
+        <div id="helper-card" class="helper-card">
+            <div class="helper-title">💡 心算小幫手</div>
+            <div id="ten-frame-rows" class="ten-frame-rows"></div>
+            <div id="helper-trick-text" class="helper-trick-text"></div>
+        </div>
+
+        <!-- 連擊與 Fever 徽章 -->
+        <div id="combo-banner" class="combo-banner">COMBO x2</div>
+
+        <!-- 互動泡泡天空畫布 -->
+        <canvas id="game-canvas"></canvas>
+
+        <!-- 答錯或提示時的浮動鼓勵氣泡 -->
+        <div id="hint-toast" class="hint-toast">
+            <div class="hint-toast-text" id="hint-toast-text">💡 小秘訣提示</div>
+        </div>
+
+        <!-- 底部魔法貓咪與發光水晶球算式台 -->
+        <div class="cannon-dock">
+            <!-- 內嵌 SVG 魔法貓咪與魔杖 -->
+            <svg id="wizard-cat" class="wizard-cat-svg" viewBox="0 0 120 96" aria-hidden="true">
+                <!-- 魔法帽 -->
+                <polygon points="60,4 34,36 86,36" fill="#7C3AED" stroke="#4C1D95" stroke-width="3" stroke-linejoin="round"/>
+                <ellipse cx="60" cy="36" rx="34" ry="7" fill="#8B5CF6" stroke="#4C1D95" stroke-width="3"/>
+                <polygon points="60,15 62,21 68,21 63,25 65,31 60,27 55,31 57,25 52,21 58,21" fill="#FBBF24"/>
+                <!-- 貓耳朵 -->
+                <polygon points="36,36 30,20 46,32" fill="#FDE68A" stroke="#78350F" stroke-width="3" stroke-linejoin="round"/>
+                <polygon points="84,36 90,20 74,32" fill="#FDE68A" stroke="#78350F" stroke-width="3" stroke-linejoin="round"/>
+                <!-- 貓咪圓臉 -->
+                <ellipse cx="60" cy="58" rx="28" ry="22" fill="#FEF3C7" stroke="#78350F" stroke-width="3"/>
+                <!-- 眼睛與腮紅 -->
+                <circle cx="49" cy="55" r="3.5" fill="#4A3F35"/>
+                <circle cx="71" cy="55" r="3.5" fill="#4A3F35"/>
+                <ellipse cx="42" cy="62" rx="4.5" ry="2.5" fill="#FCA5A5"/>
+                <ellipse cx="78" cy="62" rx="4.5" ry="2.5" fill="#FCA5A5"/>
+                <path d="M56,61 Q60,65 64,61" fill="none" stroke="#4A3F35" stroke-width="2.5" stroke-linecap="round"/>
+                <!-- 魔法棒 -->
+                <line x1="88" y1="74" x2="108" y2="44" stroke="#B45309" stroke-width="4" stroke-linecap="round"/>
+                <polygon points="108,34 111,41 118,41 112,46 114,53 108,48 102,53 104,46 98,41 105,41" fill="#FBBF24" stroke="#D97706" stroke-width="1.5"/>
+            </svg>
+
+            <div class="crystal-ball-panel">
+                <div class="crystal-tag" id="crystal-type-tag">✨ 10 減數魔法</div>
+                <div class="crystal-equation">
+                    <span id="eq-left">10</span> − <span id="eq-right">4</span> = <span class="q-mark">?</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================
+         畫面 3：結算畫面
+         ========================================= -->
+    <section id="screen-result" class="screen">
+        <div class="result-card">
+            <div class="stars-display" id="result-stars">
+                <span class="star">⭐</span>
+                <span class="star">⭐</span>
+                <span class="star">⭐</span>
+            </div>
+            <h2 class="result-heading" id="result-heading">太厲害了！泡泡全擊破！</h2>
+            <p class="result-sub" id="result-sub">魔法泡泡都被你順利擊破囉！</p>
+
+            <div class="metrics-grid">
+                <div class="metric-item">
+                    <span class="metric-num" id="res-score">0</span>
+                    <span class="metric-lbl">最終得分</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-num" id="res-hits">0</span>
+                    <span class="metric-lbl">答對題數</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-num" id="res-combo">0</span>
+                    <span class="metric-lbl">最高連擊</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-num" id="res-acc">100%</span>
+                    <span class="metric-lbl">準確率</span>
+                </div>
+            </div>
+
+            <!-- 錯題小複習 -->
+            <div id="missed-box" class="missed-box"></div>
+
+            <div class="result-btns">
+                <button type="button" class="action-btn btn-again" onclick="replayStage()">🔄 再玩一次</button>
+                <button type="button" class="action-btn btn-stages" onclick="quitToMenu()">🗺️ 切換關卡</button>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+    /* ==========================================================================
+       1. Web Audio API 街機音效合成器 (無需外部音檔)
+       ========================================================================== */
+    class ArcadeSound {
+        constructor() {
+            this.enabled = true;
+            this.ctx = null;
+        }
+
+        ensureContext() {
+            if (!this.ctx) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) this.ctx = new AudioCtx();
+            }
+            if (this.ctx && this.ctx.state === 'suspended') {
+                this.ctx.resume();
+            }
+        }
+
+        tone(freq, type, duration, offset = 0, vol = 0.22, slideTo = null) {
+            if (!this.enabled) return;
+            this.ensureContext();
+            if (!this.ctx) return;
+
+            const t = this.ctx.currentTime + offset;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, t);
+            if (slideTo) {
+                osc.frequency.exponentialRampToValueAtTime(slideTo, t + duration);
+            }
+
+            gain.gain.setValueAtTime(vol, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(t);
+            osc.stop(t + duration);
+        }
+
+        click() {
+            this.tone(540, 'sine', 0.08, 0, 0.15);
+        }
+
+        shoot() {
+            this.tone(880, 'sine', 0.14, 0, 0.16, 360);
+        }
+
+        pop(combo = 1) {
+            const pitchBoost = Math.min(combo - 1, 8) * 45;
+            this.tone(440 + pitchBoost, 'sine', 0.12, 0, 0.24, 800 + pitchBoost);
+            this.tone(660 + pitchBoost, 'triangle', 0.2, 0.05, 0.2);
+        }
+
+        bonusTime() {
+            this.tone(587.33, 'triangle', 0.12, 0, 0.24);
+            this.tone(880, 'triangle', 0.14, 0.08, 0.24);
+            this.tone(1174.66, 'triangle', 0.25, 0.16, 0.24);
+        }
+
+        wobble() {
+            this.tone(240, 'sine', 0.18, 0, 0.2, 170);
+        }
+
+        fanfare() {
+            const notes = [523.25, 659.25, 783.99, 1046.5];
+            notes.forEach((n, i) => this.tone(n, 'triangle', 0.35, i * 0.1, 0.24));
+        }
+    }
+
+    const sound = new ArcadeSound();
+
+    /* ==========================================================================
+       2. 遊戲核心狀態與關卡定義
+       ========================================================================== */
+    const GAME_DURATION = 60;
+    const RELAX_TARGET_HITS = 15;
+
+    const STAGE_LABELS = {
+        1: '第一關：10的減法',
+        2: '第二關：鄰居及雙胞胎數減法',
+        3: '第三關：四種混合減法'
+    };
+
+    const state = {
+        playMode: 'arcade', // 'arcade' | 'relax'
+        hintMode: false,
+        stage: 1,
+        running: false,
+        score: 0,
+        timeLeft: GAME_DURATION,
+        combo: 0,
+        maxCombo: 0,
+        totalClicks: 0,
+        correctHits: 0,
+        currentQuestion: null,
+        lastQuestionKey: '',
+        typeBag: [],
+        missedMap: new Map(),
+        bubbles: [],
+        beams: [],
+        particles: [],
+        floatingTexts: [],
+        clouds: [],
+        hintTimer: null,
+        lastFrameTime: 0,
+        timerAccum: 0
+    };
+
+    const BUBBLE_PALETTES = [
+        { fill: 'rgba(186, 225, 255, 0.90)', stroke: '#4A90E2', text: '#1E3A8A' },
+        { fill: 'rgba(168, 230, 207, 0.90)', stroke: '#34D399', text: '#065F46' },
+        { fill: 'rgba(255, 234, 167, 0.92)', stroke: '#F59E0B', text: '#78350F' },
+        { fill: 'rgba(255, 170, 165, 0.90)', stroke: '#F43F5E', text: '#881337' },
+        { fill: 'rgba(212, 193, 236, 0.90)', stroke: '#8B5CF6', text: '#4C1D95' }
+    ];
+
+    /* ==========================================================================
+       3. 畫面切換與按鈕事件初始化
+       ========================================================================== */
+    const canvas = document.getElementById('game-canvas');
+    const ctx = canvas.getContext('2d');
+
+    function initUI() {
+        document.querySelectorAll('#play-mode-group .mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                sound.click();
+                document.querySelectorAll('#play-mode-group .mode-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                state.playMode = btn.dataset.mode;
+            });
+        });
+
+        const hintBtn = document.getElementById('btn-hint-toggle');
+        hintBtn.addEventListener('click', () => {
+            state.hintMode = !state.hintMode;
+            hintBtn.classList.toggle('active', state.hintMode);
+            sound.click();
+            if (state.running && state.currentQuestion) {
+                updateHelperCardUI();
+                if (state.hintMode) {
+                    showHintToast(state.currentQuestion.tip, 4000);
+                } else {
+                    hideHintToast();
+                }
+            }
+        });
+
+        const soundBtn = document.getElementById('btn-sound-toggle');
+        soundBtn.addEventListener('click', () => {
+            sound.enabled = !sound.enabled;
+            soundBtn.textContent = sound.enabled ? '🔊' : '🔇';
+            soundBtn.classList.toggle('active', sound.enabled);
+            if (sound.enabled) sound.click();
+        });
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        canvas.addEventListener('pointerdown', handleCanvasPointerDown);
+    }
+
+    function resizeCanvas() {
+        const gameScreen = document.getElementById('screen-game');
+        const rect = gameScreen.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const w = rect.width || window.innerWidth;
+        const h = rect.height || (window.innerHeight - 60);
+
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        canvas.logicalWidth = w;
+        canvas.logicalHeight = h;
+    }
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if (id === 'screen-game') {
+            resizeCanvas();
+        }
+    }
+
+    function quitToMenu() {
+        sound.click();
+        state.running = false;
+        hideHintToast();
+        showScreen('screen-home');
+    }
+
+    /* ==========================================================================
+       4. 題庫產生器 (20 以內四大減法題型，無連續重複)
+       ========================================================================== */
+    function getNextQuestionType(stage) {
+        if (state.typeBag.length === 0) {
+            let pool = [];
+            if (stage === 1) {
+                pool = ['ten_minus', 'minus_ten', 'ten_minus', 'minus_ten'];
+            } else if (stage === 2) {
+                pool = ['same_ones', 'adjacent', 'same_ones', 'adjacent'];
+            } else {
+                pool = ['ten_minus', 'minus_ten', 'same_ones', 'adjacent'];
+            }
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+            state.typeBag = pool;
+        }
+        return state.typeBag.pop();
+    }
+
+    function createQuestion(stage) {
+        let q;
+        let safety = 0;
+        do {
+            const type = getNextQuestionType(stage);
+            q = buildQuestionByType(type);
+            safety++;
+        } while (q.key === state.lastQuestionKey && safety < 20);
+
+        state.lastQuestionKey = q.key;
+        return q;
+    }
+
+    function buildQuestionByType(type) {
+        let minuend, subtrahend, answer, tag, tip;
+
+        if (type === 'ten_minus') {
+            // 10 減數：10 - 1 到 10 - 9
+            minuend = 10;
+            subtrahend = Math.floor(Math.random() * 9) + 1;
+            answer = 10 - subtrahend;
+            tag = '✨ 10 減數（10 的好朋友）';
+            tip = `${subtrahend} 和 ${answer} 是湊成 10 的好朋友！`;
+        } else if (type === 'minus_ten') {
+            // 減 10：11 - 10 到 20 - 10
+            minuend = Math.floor(Math.random() * 10) + 11;
+            subtrahend = 10;
+            answer = minuend - 10;
+            tag = '🔟 減 10 魔法';
+            tip = `${minuend} 減掉整整 10，就剩下個位數 ${answer}！`;
+        } else if (type === 'same_ones') {
+            // 雙胞胎個位相同：11 - 1 到 19 - 9
+            const ones = Math.floor(Math.random() * 9) + 1;
+            minuend = 10 + ones;
+            subtrahend = ones;
+            answer = 10;
+            tag = '👯 雙胞胎個位相同';
+            tip = `雙胞胎個位 ${ones} 消掉，剛好剩下 10！`;
+        } else {
+            // 鄰居相鄰數：2 - 1 到 20 - 19
+            minuend = Math.floor(Math.random() * 19) + 2;
+            subtrahend = minuend - 1;
+            answer = 1;
+            tag = '🪜 鄰居相鄰兩數相減';
+            tip = `${minuend} 和 ${subtrahend} 是緊挨著的鄰居，相差永遠是 1！`;
+        }
+
+        return {
+            type,
+            minuend,
+            subtrahend,
+            answer,
+            tag,
+            tip,
+            key: `${minuend}-${subtrahend}`
+        };
+    }
+
+    /* ==========================================================================
+       5. 遊戲啟動與泡泡波次生成
+       ========================================================================== */
+    function startStage(stage) {
+        sound.click();
+        state.stage = stage;
+        state.running = true;
+        state.score = 0;
+        state.timeLeft = GAME_DURATION;
+        state.combo = 0;
+        state.maxCombo = 0;
+        state.totalClicks = 0;
+        state.correctHits = 0;
+        state.lastQuestionKey = '';
+        state.typeBag = [];
+        state.missedMap.clear();
+        state.beams = [];
+        state.particles = [];
+        state.floatingTexts = [];
+        state.timerAccum = 0;
+
+        document.getElementById('hud-level-badge').textContent = STAGE_LABELS[stage];
+
+        showScreen('screen-game');
+        initBackgroundClouds();
+        updateHUD();
+        spawnNextWave();
+
+        state.lastFrameTime = performance.now();
+        requestAnimationFrame(gameLoop);
+    }
+
+    function replayStage() {
+        startStage(state.stage);
+    }
+
+    function initBackgroundClouds() {
+        const w = canvas.logicalWidth || window.innerWidth;
+        const h = canvas.logicalHeight || window.innerHeight;
+        state.clouds = [];
+        for (let i = 0; i < 5; i++) {
+            state.clouds.push({
+                x: Math.random() * w,
+                y: 60 + Math.random() * (h * 0.55),
+                scale: 0.7 + Math.random() * 0.55,
+                speed: 10 + Math.random() * 14
+            });
+        }
+    }
+
+    function spawnNextWave() {
+        const q = createQuestion(state.stage);
+        state.currentQuestion = q;
+
+        document.getElementById('crystal-type-tag').textContent = q.tag;
+        document.getElementById('eq-left').textContent = q.minuend;
+        document.getElementById('eq-right').textContent = q.subtrahend;
+
+        updateHelperCardUI();
+        if (state.hintMode) {
+            showHintToast(q.tip, 4500);
+        } else {
+            hideHintToast();
+        }
+
+        const values = generateBubbleValues(q);
+        const w = canvas.logicalWidth || 360;
+        const h = canvas.logicalHeight || 640;
+
+        const topBound = 80;
+        const bottomBound = Math.max(topBound + 180, h - 180);
+        const baseRadius = Math.max(42, Math.min(54, w * 0.11));
+
+        const newBubbles = [];
+        const palettes = [...BUBBLE_PALETTES].sort(() => Math.random() - 0.5);
+
+        values.forEach((val, idx) => {
+            let x, y, validPos;
+            let tries = 0;
+            do {
+                validPos = true;
+                x = baseRadius + 16 + Math.random() * (w - (baseRadius + 16) * 2);
+                y = topBound + baseRadius + Math.random() * (bottomBound - topBound - baseRadius * 2);
+
+                for (const other of newBubbles) {
+                    const dist = Math.hypot(x - other.x, y - other.y);
+                    if (dist < baseRadius + other.r + 18) {
+                        validPos = false;
+                        break;
+                    }
+                }
+                tries++;
+            } while (!validPos && tries < 60);
+
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 25 + Math.random() * 22 + (state.combo >= 3 ? 10 : 0);
+
+            newBubbles.push({
+                kind: 'answer',
+                value: val,
+                isCorrect: val === q.answer,
+                x,
+                y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                r: baseRadius,
+                scale: 0.1,
+                wobbleTime: 0,
+                bobPhase: Math.random() * Math.PI * 2,
+                palette: palettes[idx % palettes.length],
+                disabled: false
+            });
+        });
+
+        // 60秒街機模式中偶爾飄出「+5秒」獎勵星星泡泡
+        if (state.playMode === 'arcade' && state.timeLeft < 52 && Math.random() < 0.28) {
+            const bonusR = baseRadius * 0.78;
+            const bx = bonusR + 20 + Math.random() * (w - (bonusR + 20) * 2);
+            const by = topBound + bonusR + 10;
+            newBubbles.push({
+                kind: 'bonus_time',
+                value: '+5秒',
+                isCorrect: false,
+                x: bx,
+                y: by,
+                vx: (Math.random() < 0.5 ? 1 : -1) * 40,
+                vy: 18,
+                r: bonusR,
+                scale: 0.1,
+                wobbleTime: 0,
+                bobPhase: 0,
+                palette: { fill: 'rgba(254, 240, 138, 0.96)', stroke: '#EAB308', text: '#854D0E' },
+                disabled: false
+            });
+        }
+
+        state.bubbles = newBubbles;
+    }
+
+    function generateBubbleValues(q) {
+        const set = new Set([q.answer]);
+        const distractors = [
+            q.answer + 1,
+            q.answer - 1,
+            10,
+            1,
+            0,
+            q.subtrahend,
+            Math.abs(10 - q.answer),
+            q.minuend - 10
+        ].filter(n => n >= 0 && n <= 20 && n !== q.answer);
+
+        while (set.size < 4 && distractors.length > 0) {
+            const idx = Math.floor(Math.random() * distractors.length);
+            set.add(distractors.splice(idx, 1)[0]);
+        }
+
+        while (set.size < 4) {
+            set.add(Math.floor(Math.random() * 12));
+        }
+
+        return Array.from(set).sort(() => Math.random() - 0.5);
+    }
+
+    /* ==========================================================================
+       6. 角落心算小幫手 (十格陣 + 口訣)
+       ========================================================================== */
+    function updateHelperCardUI() {
+        const card = document.getElementById('helper-card');
+        const rowsContainer = document.getElementById('ten-frame-rows');
+        const trickText = document.getElementById('helper-trick-text');
+
+        if (!state.hintMode || !state.currentQuestion) {
+            card.classList.remove('visible');
+            return;
+        }
+
+        card.classList.add('visible');
+        rowsContainer.innerHTML = '';
+
+        const q = state.currentQuestion;
+        trickText.textContent = q.tip;
+
+        const row1Count = Math.min(q.minuend, 10);
+        const row2Count = Math.max(0, q.minuend - 10);
+
+        const r1 = document.createElement('div');
+        r1.className = 'tf-row';
+        for (let i = 1; i <= row1Count; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'tf-dot';
+            if (i <= q.answer) {
+                if (row1Count === 10 && q.answer === 10) dot.classList.add('ten-group');
+            } else {
+                dot.classList.add('crossed');
+            }
+            r1.appendChild(dot);
+        }
+        rowsContainer.appendChild(r1);
+
+        if (row2Count > 0) {
+            const r2 = document.createElement('div');
+            r2.className = 'tf-row';
+            for (let j = 1; j <= row2Count; j++) {
+                const idx = 10 + j;
+                const dot = document.createElement('div');
+                dot.className = 'tf-dot';
+                if (idx > q.answer) dot.classList.add('crossed');
+                r2.appendChild(dot);
+            }
+            rowsContainer.appendChild(r2);
+        }
+    }
+
+    function showHintToast(text, duration = 3000) {
+        const toast = document.getElementById('hint-toast');
+        document.getElementById('hint-toast-text').textContent = `💡 ${text}`;
+        toast.classList.add('visible');
+
+        if (state.hintTimer) clearTimeout(state.hintTimer);
+        state.hintTimer = setTimeout(() => {
+            if (!state.hintMode) {
+                toast.classList.remove('visible');
+            }
+        }, duration);
+    }
+
+    function hideHintToast() {
+        document.getElementById('hint-toast').classList.remove('visible');
+    }
+
+    /* ==========================================================================
+       7. 泡泡點擊與魔法星星光束射擊判定
+       ========================================================================== */
+    function handleCanvasPointerDown(e) {
+        if (!state.running) return;
+        const rect = canvas.getBoundingClientRect();
+        const px = e.clientX - rect.left;
+        const py = e.clientY - rect.top;
+
+        for (let i = state.bubbles.length - 1; i >= 0; i--) {
+            const b = state.bubbles[i];
+            if (b.disabled) continue;
+            const dist = Math.hypot(px - b.x, py - b.y);
+            if (dist <= b.r + 12) {
+                triggerMagicShot(b);
+                return;
+            }
+        }
+    }
+
+    function triggerMagicShot(bubble) {
+        const w = canvas.logicalWidth;
+        const h = canvas.logicalHeight;
+        const startX = w / 2 + 30;
+        const startY = h - 115;
+
+        const catEl = document.getElementById('wizard-cat');
+        catEl.classList.remove('shoot');
+        void catEl.offsetWidth;
+        catEl.classList.add('shoot');
+
+        sound.shoot();
+
+        state.beams.push({
+            x1: startX,
+            y1: startY,
+            x2: bubble.x,
+            y2: bubble.y,
+            life: 1.0,
+            color: bubble.kind === 'bonus_time' ? '#FACC15' : (bubble.isCorrect ? '#34D399' : '#FB7185')
+        });
+
+        // 獎勵時間泡泡
+        if (bubble.kind === 'bonus_time') {
+            sound.bonusTime();
+            state.timeLeft = Math.min(99, state.timeLeft + 5);
+            spawnBurstParticles(bubble.x, bubble.y, '#FACC15', 18);
+            addFloatingText(bubble.x, bubble.y, '⏰ +5秒！', '#D97706');
+            state.bubbles = state.bubbles.filter(item => item !== bubble);
+            updateHUD();
+            return;
+        }
+
+        state.totalClicks++;
+
+        // 命中正確泡泡
+        if (bubble.isCorrect) {
+            state.correctHits++;
+            state.combo++;
+            if (state.combo > state.maxCombo) state.maxCombo = state.combo;
+
+            const isFever = state.combo >= 3;
+            const pointsEarned = 10 * (isFever ? 2 : 1);
+            state.score += pointsEarned;
+
+            sound.pop(state.combo);
+            spawnBurstParticles(bubble.x, bubble.y, bubble.palette.stroke, isFever ? 28 : 18);
+            addFloatingText(
+                bubble.x,
+                bubble.y - 10,
+                isFever ? `🔥 +${pointsEarned} (FEVER!)` : `✨ +${pointsEarned}`,
+                isFever ? '#E11D48' : '#059669'
+            );
+
+            updateHUD();
+
+            if (state.playMode === 'relax' && state.correctHits >= RELAX_TARGET_HITS) {
+                state.bubbles = [];
+                setTimeout(() => endGame(), 450);
+                return;
+            }
+
+            spawnNextWave();
+
+        } else {
+            // 誤擊錯誤泡泡
+            sound.wobble();
+            state.combo = 0;
+            bubble.wobbleTime = 0.55;
+            bubble.disabled = true;
+
+            const q = state.currentQuestion;
+            if (!state.missedMap.has(q.key)) {
+                state.missedMap.set(q.key, {
+                    equation: `${q.minuend} − ${q.subtrahend} = ${q.answer}`,
+                    tip: q.tip
+                });
+            }
+
+            addFloatingText(bubble.x, bubble.y, '再試一次！', '#E11D48');
+            showHintToast(q.tip, 3500);
+            updateHUD();
+        }
+    }
+
+    /* ==========================================================================
+       8. 粒子特效與 HUD 更新
+       ========================================================================== */
+    function spawnBurstParticles(x, y, color, count) {
+        const colors = [color, '#FBBF24', '#60A5FA', '#F472B6', '#FFFFFF'];
+        for (let i = 0; i < count; i++) {
+            const angle = (Math.PI * 2 * i) / count + Math.random() * 0.4;
+            const speed = 70 + Math.random() * 160;
+            state.particles.push({
+                x,
+                y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                r: 4 + Math.random() * 5,
+                color: colors[i % colors.length],
+                life: 1.0
+            });
+        }
+    }
+
+    function addFloatingText(x, y, text, color) {
+        state.floatingTexts.push({ x, y, text, color, life: 1.0 });
+    }
+
+    function updateHUD() {
+        document.getElementById('hud-score').textContent = state.score;
+
+        const timerBox = document.getElementById('hud-timer-box');
+        const timerEl = document.getElementById('hud-timer');
+
+        if (state.playMode === 'arcade') {
+            timerEl.textContent = `${Math.ceil(state.timeLeft)}s`;
+            timerBox.classList.toggle('urgent', state.timeLeft <= 10);
+        } else {
+            timerBox.classList.remove('urgent');
+            timerEl.textContent = `∞ (${state.correctHits}/${RELAX_TARGET_HITS})`;
+        }
+
+        const comboEl = document.getElementById('combo-banner');
+        if (state.combo >= 2) {
+            comboEl.classList.add('visible');
+            if (state.combo >= 3) {
+                comboEl.classList.add('fever');
+                comboEl.textContent = `🔥 FEVER x${state.combo} 雙倍分！`;
+            } else {
+                comboEl.classList.remove('fever');
+                comboEl.textContent = `✨ COMBO x${state.combo}`;
+            }
+        } else {
+            comboEl.classList.remove('visible', 'fever');
+        }
+    }
+
+    /* ==========================================================================
+       9. 主遊戲迴圈 (物理運動與 Canvas 繪圖)
+       ========================================================================== */
+    function gameLoop(now) {
+        if (!state.running) return;
+
+        const dt = Math.min((now - state.lastFrameTime) / 1000, 0.05);
+        state.lastFrameTime = now;
+
+        updatePhysics(dt);
+        renderCanvas();
+
+        requestAnimationFrame(gameLoop);
+    }
+
+    function updatePhysics(dt) {
+        const w = canvas.logicalWidth;
+        const h = canvas.logicalHeight;
+        const topBound = 74;
+        const bottomBound = Math.max(topBound + 170, h - 175);
+
+        if (state.playMode === 'arcade') {
+            state.timeLeft -= dt;
+            state.timerAccum += dt;
+            if (state.timerAccum >= 0.25) {
+                state.timerAccum = 0;
+                updateHUD();
+            }
+            if (state.timeLeft <= 0) {
+                state.timeLeft = 0;
+                updateHUD();
+                endGame();
+                return;
+            }
+        }
+
+        for (const c of state.clouds) {
+            c.x += c.speed * dt;
+            if (c.x > w + 90) c.x = -90;
+        }
+
+        for (let i = 0; i < state.bubbles.length; i++) {
+            const b = state.bubbles[i];
+            if (b.scale < 1) {
+                b.scale = Math.min(1, b.scale + dt * 4.5);
+            }
+            if (b.wobbleTime > 0) {
+                b.wobbleTime = Math.max(0, b.wobbleTime - dt);
+            }
+
+            b.bobPhase += dt * 2.5;
+            b.x += b.vx * dt;
+            b.y += (b.vy + Math.sin(b.bobPhase) * 14) * dt;
+
+            if (b.x - b.r < 12) {
+                b.x = 12 + b.r;
+                b.vx = Math.abs(b.vx);
+            } else if (b.x + b.r > w - 12) {
+                b.x = w - 12 - b.r;
+                b.vx = -Math.abs(b.vx);
+            }
+
+            if (b.y - b.r < topBound) {
+                b.y = topBound + b.r;
+                b.vy = Math.abs(b.vy);
+            } else if (b.y + b.r > bottomBound) {
+                b.y = bottomBound - b.r;
+                b.vy = -Math.abs(b.vy);
+            }
+
+            for (let j = i + 1; j < state.bubbles.length; j++) {
+                const b2 = state.bubbles[j];
+                const dx = b2.x - b.x;
+                const dy = b2.y - b.y;
+                const dist = Math.hypot(dx, dy);
+                const minDist = b.r + b2.r + 8;
+                if (dist > 0 && dist < minDist) {
+                    const overlap = (minDist - dist) * 0.5;
+                    const nx = dx / dist;
+                    const ny = dy / dist;
+                    b.x -= nx * overlap;
+                    b.y -= ny * overlap;
+                    b2.x += nx * overlap;
+                    b2.y += ny * overlap;
+                }
+            }
+        }
+
+        for (let i = state.beams.length - 1; i >= 0; i--) {
+            state.beams[i].life -= dt * 3.8;
+            if (state.beams[i].life <= 0) state.beams.splice(i, 1);
+        }
+
+        for (let i = state.particles.length - 1; i >= 0; i--) {
+            const p = state.particles[i];
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            p.vy += 220 * dt;
+            p.life -= dt * 1.8;
+            if (p.life <= 0) state.particles.splice(i, 1);
+        }
+
+        for (let i = state.floatingTexts.length - 1; i >= 0; i--) {
+            const ft = state.floatingTexts[i];
+            ft.y -= 48 * dt;
+            ft.life -= dt * 1.25;
+            if (ft.life <= 0) state.floatingTexts.splice(i, 1);
+        }
+    }
+
+    function renderCanvas() {
+        const w = canvas.logicalWidth;
+        const h = canvas.logicalHeight;
+        ctx.clearRect(0, 0, w, h);
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        for (const c of state.clouds) {
+            drawCloud(c.x, c.y, c.scale);
+        }
+
+        for (const beam of state.beams) {
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, beam.life);
+            ctx.strokeStyle = beam.color;
+            ctx.lineWidth = 10 * beam.life;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(beam.x1, beam.y1);
+            ctx.lineTo(beam.x2, beam.y2);
+            ctx.stroke();
+
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 4 * beam.life;
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        const isFever = state.combo >= 3;
+        for (const b of state.bubbles) {
+            ctx.save();
+            const wobbleX = b.wobbleTime > 0 ? Math.sin(b.wobbleTime * 45) * 8 : 0;
+            ctx.translate(b.x + wobbleX, b.y);
+            ctx.scale(b.scale, b.scale);
+
+            if (b.disabled) {
+                ctx.globalAlpha = 0.35;
+            }
+
+            ctx.beginPath();
+            ctx.arc(0, 0, b.r, 0, Math.PI * 2);
+            ctx.fillStyle = b.palette.fill;
+            ctx.fill();
+
+            ctx.lineWidth = isFever && !b.disabled ? 5 : 4;
+            ctx.strokeStyle = isFever && !b.disabled ? '#F59E0B' : b.palette.stroke;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.ellipse(-b.r * 0.32, -b.r * 0.32, b.r * 0.22, b.r * 0.12, -Math.PI / 4, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.fill();
+
+            ctx.fillStyle = b.palette.text;
+            ctx.font = b.kind === 'bonus_time'
+                ? `900 ${Math.round(b.r * 0.44)}px "Nunito", "PingFang TC", sans-serif`
+                : `900 ${Math.round(b.r * 0.78)}px "Nunito", "PingFang TC", sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(b.value, 0, 2);
+
+            ctx.restore();
+        }
+
+        for (const p of state.particles) {
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, p.life);
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        for (const ft of state.floatingTexts) {
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, ft.life);
+            ctx.font = '900 22px "Nunito", "PingFang TC", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.strokeText(ft.text, ft.x, ft.y);
+            ctx.fillStyle = ft.color;
+            ctx.fillText(ft.text, ft.x, ft.y);
+            ctx.restore();
+        }
+    }
+
+    function drawCloud(x, y, scale) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(scale, scale);
+        ctx.beginPath();
+        ctx.arc(0, 0, 26, 0, Math.PI * 2);
+        ctx.arc(24, -6, 30, 0, Math.PI * 2);
+        ctx.arc(52, 0, 24, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+
+    /* ==========================================================================
+       10. 回合結算與錯題複習
+       ========================================================================== */
+    function endGame() {
+        state.running = false;
+        hideHintToast();
+        sound.fanfare();
+
+        const acc = state.totalClicks > 0
+            ? Math.round((state.correctHits / state.totalClicks) * 100)
+            : 100;
+
+        let stars = 1;
+        if (state.correctHits >= 12 && acc >= 85) {
+            stars = 3;
+        } else if (state.correctHits >= 6 && acc >= 65) {
+            stars = 2;
+        }
+
+        document.getElementById('result-heading').textContent =
+            stars === 3 ? '🏆 傳說級減法魔法射手！' :
+            stars === 2 ? '🎉 表現超棒！泡泡全擊破！' : '✨ 順利完成減法魔法練習！';
+
+        document.getElementById('result-sub').textContent =
+            `你在「${STAGE_LABELS[state.stage]}」共擊破了 ${state.correctHits} 顆正確泡泡！`;
+
+        document.getElementById('res-score').textContent = state.score;
+        document.getElementById('res-hits').textContent = `${state.correctHits} 題`;
+        document.getElementById('res-combo').textContent = `x${state.maxCombo}`;
+        document.getElementById('res-acc').textContent = `${acc}%`;
+
+        const starEls = document.querySelectorAll('#result-stars .star');
+        starEls.forEach((el, idx) => {
+            el.classList.remove('earned');
+            if (idx < stars) {
+                setTimeout(() => el.classList.add('earned'), 180 + idx * 220);
+            }
+        });
+
+        const missedBox = document.getElementById('missed-box');
+        if (state.missedMap.size === 0) {
+            missedBox.className = 'missed-box perfect';
+            missedBox.innerHTML = `<div style="font-weight:900; color:#15803D; font-size:1.02rem;">🌟 零失誤完美通關！一顆都沒有射錯喔！</div>`;
+        } else {
+            missedBox.className = 'missed-box';
+            let html = `<div class="missed-title">📖 錯題小複習（記住口訣下次秒殺！）：</div>`;
+            state.missedMap.forEach(item => {
+                html += `
+                    <div class="missed-item">
+                        <div class="missed-eq">${item.equation.replace(/= (\d+)$/, '= <span class="ans">$1</span>')}</div>
+                        <div class="missed-tip">💡 ${item.tip}</div>
+                    </div>
+                `;
+            });
+            missedBox.innerHTML = html;
+        }
+
+        showScreen('screen-result');
+    }
+
+    window.addEventListener('DOMContentLoaded', initUI);
+</script>
+</body>
+</html>
